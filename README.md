@@ -24,12 +24,12 @@ Unity 엔진과 C#을 사용하여 개발한 2D 로컬 멀티플레이 1:1 대�
 ### 스킬
 | 근거리 | 원거리 | 쉴드 |
 |---|---|---|
-| <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/e384569a-7c31-4e39-9d5f-057162d5bd95" /> | <img width="300" height="150" alt="Image" src="https://github.com/user-attachments/assets/32d4d030-f841-4d65-9058-dc8ee134b964" /> | <img width="300" height="150" alt="Image" src="https://github.com/user-attachments/assets/d1f2477c-1a8a-4302-af08-5bf9b87a106d" /> |
+| <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/e384569a-7c31-4e39-9d5f-057162d5bd95" /> | <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/32d4d030-f841-4d65-9058-dc8ee134b964" /> | <img width="300" height="150" alt="Image" src="https://github.com/user-attachments/assets/d1f2477c-1a8a-4302-af08-5bf9b87a106d" /> |
 <br>
 
 | 개미 궁극기1 | 개미 궁극기2 | 개미 궁극기 3 |
 |---|---|---|
-| <img width="250" height="130" alt="Image" src="https://github.com/user-attachments/assets/9b361166-749d-4581-ad5f-a2e97ade550b" /> | <img width="250" height="130" alt="Image" src="https://github.com/user-attachments/assets/0eb275eb-6046-4931-927a-85de5b533a07" /> | <img width="250" height="130" alt="Image" src="https://github.com/user-attachments/assets/d561e7aa-d9f5-4b95-8a12-b8ecfe786391" /> |
+| <img width="200" height="100" alt="Image" src="https://github.com/user-attachments/assets/9b361166-749d-4581-ad5f-a2e97ade550b" /> | <img width="250" height="130" alt="Image" src="https://github.com/user-attachments/assets/0eb275eb-6046-4931-927a-85de5b533a07" /> | <img width="250" height="130" alt="Image" src="https://github.com/user-attachments/assets/d561e7aa-d9f5-4b95-8a12-b8ecfe786391" /> |
 <br>
 
 | 벌 궁극기1 | 벌 궁극기2 |
