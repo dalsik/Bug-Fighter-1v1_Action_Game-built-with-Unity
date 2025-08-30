@@ -22,9 +22,9 @@ Unity 엔진과 C#을 사용하여 개발한 2D 로컬 멀티플레이 1:1 대�
 <br>
 
 ### 스킬
-| 근거리 | 원거리 | 쉴드 |
-|---|---|---|
-| <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/e384569a-7c31-4e39-9d5f-057162d5bd95" /> | <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/32d4d030-f841-4d65-9058-dc8ee134b964" /> | <img width="300" height="150" alt="Image" src="https://github.com/user-attachments/assets/d1f2477c-1a8a-4302-af08-5bf9b87a106d" /> |
+| 개미 근거리 | 벌 근거리 | 원거리 | 쉴드 |
+|---|---|---|---|
+| <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/e384569a-7c31-4e39-9d5f-057162d5bd95" /> | <img width="200" height="110" alt="Image" src="https://github.com/user-attachments/assets/47e72685-1767-46a0-bcbd-37623743c1fe" /> | <img width="200" height="130" alt="Image" src="https://github.com/user-attachments/assets/32d4d030-f841-4d65-9058-dc8ee134b964" /> | <img width="300" height="150" alt="Image" src="https://github.com/user-attachments/assets/d1f2477c-1a8a-4302-af08-5bf9b87a106d" /> |
 <br>
 
 | 개미 궁극기1 | 개미 궁극기2 | 개미 궁극기 3 |
