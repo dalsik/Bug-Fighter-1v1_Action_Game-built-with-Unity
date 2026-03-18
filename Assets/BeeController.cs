@@ -1,79 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-// ¹ß»çÃ¼ »çÁ¤°Å¸® Å¬·¡½º(MonBehaviour)
-public class ShootStingerc : MonoBehaviour
+public class BeeController : Player
 {
-    private Vector3 startPosition; // ¹ß»çÃ¼ÀÇ ½ÃÀÛ À§Ä¡
-    public float maxDistance = 10.0f; // ¹ß»çÃ¼°¡ »ç¶óÁö´Â ÃÖ´ë °Å¸®
-
-    void Start()
-    {
-        // ¹ß»çÃ¼ »ı¼º ½Ã ÇöÀç À§Ä¡¸¦ ½ÃÀÛ À§Ä¡·Î ÀúÀå
-        startPosition = transform.position;
-    }
-
-    void Update()
-    {
-        // ¹ß»çÃ¼ÀÇ ÇöÀç À§Ä¡¿Í ½ÃÀÛ À§Ä¡ »çÀÌÀÇ °Å¸®¸¦ °è»ê
-        float distanceTraveled = Vector3.Distance(startPosition, transform.position);
-
-        // °Å¸®°¡ ÃÖ´ë »çÁ¤°Å¸®¸¦ ÃÊ°úÇÏ¸é ¹ß»çÃ¼¸¦ ÆÄ±«
-        if (distanceTraveled > maxDistance)
-        {
-            Destroy(gameObject);
-        }
-    }
-    // ¿ÀºêÁ§Æ® »èÁ¦µÇ°Ô ÇÏ´Â ½ºÅ©¸³Æ®
-    void OnTriggerEnter2D(Collider2D collision)
-    {
-        // »ó´ë¹æ ÅÂ±×°¡ "Player1" ¶Ç´Â "Player2"ÀÏ ¶§¸¸ Ã³¸®
-        if (collision.CompareTag("Player1") || collision.CompareTag("Player2"))
-        {
-            if (collision.tag != gameObject.tag) // ÀÚ½Å°ú ´Ù¸¥ ÅÂ±×¸¸ Ã³¸®
-            {
-                // Ãæµ¹ ÈÄ ¹ß»çÃ¼ ÆÄ±«
-                Destroy(gameObject);
-            }
-        }
-    }
-}
-
-public class BeeController : MonoBehaviour
-{
-    Rigidbody2D rigid2D;
-    Animator animator;
-    float jumpForce = 700.0f;
-    float walkForce = 30.0f;
-    float maxWalkSpeed = 4.0f;
-
-    float dashForce = 15.0f; // ´ë½ÃÇÒ ¶§ÀÇ Èû
-    float dashDuration = 0.1f; // ´ë½Ã Áö¼Ó ½Ã°£
-    bool isDashing = false; // ´ë½Ã ÁßÀÎÁö È®ÀÎ
-
-    float doubleTapTimeD = 0.0f; // DÅ°¸¦ µÎ ¹ø ´©¸£´Â ½Ã°£ °¨Áö
-    float doubleTapTimeA = 0.0f; // AÅ°¸¦ µÎ ¹ø ´©¸£´Â ½Ã°£ °¨Áö
-    float doubleTapDelay = 0.3f; // µÎ ¹ø ´©¸£±â °¨Áö ½Ã°£
+    // ë²Œ íŠ¹í™” ë³€ìˆ˜
+    public GameObject stingerPrefab;
+    public GameObject laserPrefab;
+    GameObject currentLaser;
+    bool isFrozen = false;
+    Vector2 frozenPosition;
+    bool laserCanDamage = false;
+    bool laserAttackUsed = false;
 
     int maxjumpcnt = 3;
     [SerializeField] int jumpcnt = 0;
 
-    public GameObject stingerPrefab;
-
-    float shieldDuration = 1.0f;
-    public GameObject shieldPrefab;
-
-    // ·¹ÀÌÀú °ü·Ã º¯¼ö
-    public GameObject laserPrefab; // ·¹ÀÌÀú ÇÁ¸®ÆÕ
-    GameObject currentLaser; // ÇöÀç È°¼ºÈ­µÈ ·¹ÀÌÀú¸¦ ÀúÀå
-    bool isFrozen = false; // ¿òÁ÷ÀÓ Á¦ÇÑ ÇÃ·¡±×
-    Vector2 frozenPosition; // ¿òÁ÷ÀÓ Á¦ÇÑ ½Ã °íÁ¤ À§Ä¡ ÀúÀå
-    bool laserCanDamage = false; // ·¹ÀÌÀú·Î µ¥¹ÌÁö¸¦ ÁÙ ¼ö ÀÖ´Â »óÅÂÀÎÁö
-
-
-    // ÄğÅ¸ÀÓ °ü·Ã º¯¼ö
+    // ì¿¨íƒ€ì„ ê´€ë ¨ ë³€ìˆ˜
     [SerializeField] private float attackUCooldown = 2f;
     [SerializeField] private float attackICooldown = 2f;
     [SerializeField] private float ShieldCooldown = 5f;
@@ -86,80 +29,78 @@ public class BeeController : MonoBehaviour
     private bool isFirstAttackI = true;
     private bool isFirstShield = true;
 
-    private bool laserAttackUsed = false; // ·¹ÀÌÀú °ø°İ »ç¿ë ¿©ºÎ¸¦ ÃßÀûÇÏ´Â º¯¼ö
-
-
-    // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
-        Application.targetFrameRate = 60;   // 60ÇÁ·¹ÀÓ °íÁ¤
-        this.rigid2D = GetComponent<Rigidbody2D>(); // rigid2D °´Ã¼
-        this.animator = GetComponent<Animator>();       // ¾Ö´Ï¸ŞÀÌÅÍ
-                                                        // ÄğÅ¸ÀÓ º¯¼ö ÃÊ±âÈ­
+        base.Start();
+        transform.localScale = new Vector3(0.7f, 0.7f, 0.7f); // ë²Œ ìŠ¤ì¼€ì¼
         lastattackUTime = 0;
         lastattackITime = 0;
         lastShieldTime = 0;
     }
 
-    // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
-        // D Å° ´ë½Ã ÀÔ·Â °¨Áö
+        if (isFrozen)
+        {
+            rigid2D.velocity = Vector2.zero;
+            rigid2D.position = frozenPosition;
+            return;
+        }
+        base.Update();
+    }
+
+    protected override void HandleInput()
+    {
         if (Input.GetKeyDown(KeyCode.D))
         {
-            if (Time.time - doubleTapTimeD < doubleTapDelay && !isDashing)
-            {
-                StartCoroutine(Dash(Vector2.right)); // ¿À¸¥ÂÊ ´ë½Ã
-            }
-            doubleTapTimeD = Time.time;
+            if (Time.time - doubleTapTimeRight < doubleTapDelay && !isDashing)
+                StartCoroutine(Dash(Vector2.right));
+            doubleTapTimeRight = Time.time;
         }
 
-        // A Å° ´ë½Ã ÀÔ·Â °¨Áö
         if (Input.GetKeyDown(KeyCode.A))
         {
-            if (Time.time - doubleTapTimeA < doubleTapDelay && !isDashing)
-            {
-                StartCoroutine(Dash(Vector2.left)); // ¿ŞÂÊ ´ë½Ã
-            }
-            doubleTapTimeA = Time.time;
+            if (Time.time - doubleTapTimeLeft < doubleTapDelay && !isDashing)
+                StartCoroutine(Dash(Vector2.left));
+            doubleTapTimeLeft = Time.time;
         }
 
-        // Á¡ÇÁ
+        // ì í”„ (ìµœëŒ€ 3ë‹¨ ì í”„)
         if (Input.GetKeyDown(KeyCode.W) && jumpcnt < maxjumpcnt)
         {
             jumpcnt++;
             this.rigid2D.AddForce(Vector2.up * jumpForce);
-            this.rigid2D.velocity = new Vector2(rigid2D.velocity.x, 0.1f); // ±âÁ¸ y¼Óµµ¸¦ ÃÊ±âÈ­ÇØ¼­ Á¡ÇÁ°¨À» ´õ Àß ´À³¢°Ô
+            this.rigid2D.velocity = new Vector2(rigid2D.velocity.x, 0.1f);
         }
 
-        if (jumpcnt == maxjumpcnt && rigid2D.velocity.y == 0) jumpcnt = 0; // ¶¥¿¡ ÂøÁöÇÏ¸é Á¡ÇÁ Ä«¿îÆ®¸¦ ´Ù½Ã 0À¸·Î ÃÊ±âÈ­
+        if (jumpcnt == maxjumpcnt && rigid2D.velocity.y == 0) jumpcnt = 0;
 
-        // ¿ø°Å¸® °ø°İ(°³¹Ì, ¹ú À¯µ¿ÀûÀ¸·Î)
+        // ê¸°ë³¸ ì›ê±°ë¦¬ ê³µê²©
         if (Input.GetKeyDown(KeyCode.K))
         {
             this.animator.SetTrigger("SpitTrigger");
-            ShootStinger(0f, 0f, 10f);
+            ShootStinger(0f, 0f, 10f, 0.1f);
         }
 
-        // °­È­ ¿ø°Å¸® °ø°İ(°³¹Ì, ¹ú À¯µ¿ÀûÀ¸·Î)
+        // ê°•í™” ì›ê±°ë¦¬ ê³µê²© (3ë°©í–¥)
         if (Input.GetKeyDown(KeyCode.I) && (isFirstAttackI || Time.time - lastattackITime > attackICooldown))
         {
             this.animator.SetTrigger("SpitTrigger");
-            ShootStinger(-0.2f, -0.1f, 7.5f);
-            ShootStinger(0f, 0f, 7.5f);
-            ShootStinger(-0.1f, 0.1f, 7.5f);
+            ShootStinger(-0.2f, -0.1f, 7.5f, 0.1f);
+            ShootStinger(0f,    0f,    7.5f, 0.1f);
+            ShootStinger(-0.1f, 0.1f,  7.5f, 0.1f);
             lastattackITime = Time.time;
             isFirstAttackI = false;
         }
 
-        // ±ÙÁ¢ °ø°İ
+        // ê·¼ê±°ë¦¬ ê³µê²©
         if (Input.GetKeyDown(KeyCode.J))
         {
             this.animator.SetTrigger("AttackTrigger");
-            PerformMeleeAttack(); // ±ÙÁ¢ °ø°İ ½ÇÇà
+            PerformMeleeAttack();
         }
 
-        // °­È­ ±ÙÁ¢ °ø°İ
+        // ê°•í™” ê·¼ê±°ë¦¬ ê³µê²© (ëŒ€ì‹œ í›„ ê³µê²©)
         if (Input.GetKeyDown(KeyCode.U) && (isFirstAttackU || Time.time - lastattackUTime > attackUCooldown))
         {
             StartCoroutine(DashAndAttack());
@@ -167,243 +108,145 @@ public class BeeController : MonoBehaviour
             isFirstAttackU = false;
         }
 
-        // LÅ° ÀÔ·Â °¨Áö ¹× ·¹ÀÌÀú °ø°İ »ç¿ë ¿©ºÎ È®ÀÎ
+        // ë ˆì´ì € ê³µê²©
         if (Input.GetKeyDown(KeyCode.L) && !isFrozen && !laserAttackUsed)
         {
             StartCoroutine(PerformLaserAttack());
-            laserAttackUsed = true; // ·¹ÀÌÀú °ø°İ »ç¿ë Ç¥½Ã
+            laserAttackUsed = true;
         }
 
-        if (isFrozen)
-        {
-            // ¿òÁ÷ÀÓ Á¦ÇÑ ½Ã À§Ä¡ °íÁ¤
-            rigid2D.velocity = Vector2.zero; // ¼Óµµ Á¤Áö
-            rigid2D.position = frozenPosition; // °íÁ¤µÈ À§Ä¡·Î ¼³Á¤
-            return; // ÀÌµ¿ Ã³¸® Á¾·á
-        }
-
-        //½¯µå
+        // ì‹¤ë“œ
         if (Input.GetKeyDown(KeyCode.S) && (isFirstShield || Time.time - lastShieldTime > ShieldCooldown))
         {
             CreateShieldEffects();
             lastShieldTime = Time.time;
             isFirstShield = false;
         }
-
-        // ÁÂ¿ì ÀÌµ¿ (´ë½Ã ÁßÀÌ ¾Æ´Ò ¶§¸¸)
-        if (!isDashing)
-        {
-            float key = 0f;
-            if (Input.GetKey(KeyCode.D))
-            {
-                this.animator.SetTrigger("WalkTrigger");
-                key = 1.0f; // ¿À¸¥ÂÊ ÀÌµ¿
-            }
-            if (Input.GetKey(KeyCode.A))
-            {
-                this.animator.SetTrigger("WalkTrigger");
-                key = -1.0f; // ¿ŞÂÊ ÀÌµ¿
-            }
-            // ÇÃ·¹ÀÌ¾î ¼Óµµ
-            float speedx = Mathf.Abs(this.rigid2D.velocity.x);
-
-            // ½ºÇÇµå Á¦ÇÑ
-            if (speedx < this.maxWalkSpeed)
-            {
-                this.rigid2D.AddForce(transform.right * key * this.walkForce);
-            }
-
-            if (key != 0)
-            {
-                float direction = key > 0 ? 1 : -1;
-                transform.localScale = new Vector3(0.7f * direction, 0.7f, 0.7f);
-            }
-
-            // ÇÃ·¹ÀÌ¾î ¼Óµµ¿¡ ¸ÂÃç ¾Ö´Ï¸ŞÀÌ¼Ç ¼Óµµ¸¦ ¹Ù²Û´Ù.
-            if (speedx != 0)
-            {
-                this.animator.speed = 2.0f;
-            }
-        }
     }
 
-    void ShootStinger(float positionx, float positiony, float distance)
+    protected override float GetMovementKey()
     {
-        // ¿ø°Å¸® ¹ß»çÃ¼ »ı¼º YÁÂÇ¥
-        Vector3 AntY = new Vector3(this.transform.position.x + positionx, this.transform.position.y - 0.6f + positiony, 0);
+        float key = 0f;
+        if (Input.GetKey(KeyCode.D)) { this.animator.SetTrigger("WalkTrigger"); key = 0.7f; }
+        if (Input.GetKey(KeyCode.A)) { this.animator.SetTrigger("WalkTrigger"); key = -0.7f; }
+        return key;
+    }
 
-        // ¹ß»çÃ¼ »ı¼º
-        GameObject stinger = Instantiate(stingerPrefab, AntY, Quaternion.identity);
+    // â”€â”€ ë°œì‚¬ì²´ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    void ShootStinger(float positionx, float positiony, float distance, float damage)
+    {
+        Vector3 spawnPos = new Vector3(
+            transform.position.x + positionx,
+            transform.position.y - 0.6f + positiony,
+            0
+        );
 
-        // ¹ß»çÃ¼¿¡ ProjectileScript Ãß°¡ ¹× ¼Ó¼º ¼³Á¤
-        ShootStingerc projectileScript = stinger.AddComponent<ShootStingerc>();
-        projectileScript.maxDistance = distance; // »çÁ¤°Å¸® ¼³Á¤ (ÇÊ¿ä¿¡ µû¶ó °ª Á¶Á¤ °¡´É)
+        GameObject stinger = Instantiate(stingerPrefab, spawnPos, Quaternion.identity);
+        stinger.tag = gameObject.tag; // ë°œì‚¬ì²´ì— í”Œë ˆì´ì–´ íƒœê·¸ ì ìš©
 
-        // ¹ß»ç ¹æÇâ ¼³Á¤
+        // í†µí•© Projectile ì»´í¬ë„ŒíŠ¸ ì„¤ì •
+        Projectile proj = stinger.GetComponent<Projectile>();
+        if (proj == null) proj = stinger.AddComponent<Projectile>();
+        proj.maxDistance = distance;
+        proj.speed = 5.0f;
+        proj.damage = damage;
+
+        float dir = transform.localScale.x > 0 ? 1f : -1f;
+
         Rigidbody2D rb = stinger.GetComponent<Rigidbody2D>();
+        rb.velocity = new Vector2(dir * proj.speed, 0f);
 
-        // ÇÃ·¹ÀÌ¾îÀÇ ÇöÀç º¸´Â ¹æÇâ(¿ŞÂÊ ¶Ç´Â ¿À¸¥ÂÊ)¿¡ µû¶ó ¹ß»ç ¹æÇâÀ» °áÁ¤
-        float direction = transform.localScale.x > 0 ? 1f : -1f; // localScale.x°¡ 0º¸´Ù Å©¸é ¿ŞÂÊ(-1), ÀÛÀ¸¸é ¿À¸¥ÂÊ(1)
-        rb.velocity = new Vector2(direction * 5f, 0f); // XÃà ¹æÇâÀ¸·Î ¼Óµµ 
+        stinger.transform.localScale = new Vector3(dir * 0.3f, 0.3f, 0.3f);
 
-        //¹ß»çÃ¼ Å©±â¿Í ¹æÇâ Á¶Á¤
-        stinger.transform.localScale = new Vector3(direction * 0.3f, 0.3f, 0.3f);
-
-        // **ÇÃ·¹ÀÌ¾î¿Í ¹ß»çÃ¼ÀÇ Ãæµ¹ ¹«½Ã**
-        Collider2D playerCollider = GetComponent<Collider2D>();
-        Collider2D stingerCollider = stinger.GetComponent<Collider2D>();
-        Physics2D.IgnoreCollision(playerCollider, stingerCollider);
-
+        Physics2D.IgnoreCollision(GetComponent<Collider2D>(), stinger.GetComponent<Collider2D>());
     }
 
-    IEnumerator Dash(Vector2 direction)
-    {
-        isDashing = true;
-        rigid2D.velocity = Vector2.zero; // ÇöÀç ¼Óµµ ÃÊ±âÈ­
-        rigid2D.AddForce(direction * dashForce, ForceMode2D.Impulse); // ´ë½Ã Èû Àû¿ë
-
-        yield return new WaitForSeconds(dashDuration); // ´ë½Ã Áö¼Ó ½Ã°£
-
-        isDashing = false; // ´ë½Ã »óÅÂ Á¾·á
-    }
-
+    // â”€â”€ ë ˆì´ì € â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     IEnumerator PerformLaserAttack()
     {
-        // ¾Ö´Ï¸ŞÀÌ¼Ç Æ®¸®°Å ½ÇÇà
         this.animator.SetTrigger("UltiTrigger");
 
-        // ¿òÁ÷ÀÓ Á¦ÇÑ ¼³Á¤
         isFrozen = true;
-        frozenPosition = rigid2D.position; // ÇöÀç À§Ä¡ ÀúÀå
+        frozenPosition = rigid2D.position;
 
-        // ·¹ÀÌÀú »ı¼º
         CreateLaser();
 
-        // 1ÃÊ ÈÄ¿¡ µ¥¹ÌÁö È°¼ºÈ­
         yield return new WaitForSeconds(1.0f);
         laserCanDamage = true;
 
-        // 3ÃÊ ÈÄ ·¹ÀÌÀú »èÁ¦
-        yield return new WaitForSeconds(1.0f); // ÃÑ 2ÃÊ (1ÃÊ + 1ÃÊ)
+        yield return new WaitForSeconds(1.0f);
         laserCanDamage = false;
 
-        // ·¹ÀÌÀú °ø°İ Á¾·á ÈÄ
-        laserCanDamage = false;
-        isFrozen = false; // ¿òÁ÷ÀÓ Á¦ÇÑ ÇØÁ¦
+        isFrozen = false;
         if (currentLaser != null)
-        {
             Destroy(currentLaser);
-        }
 
-        // ·¹ÀÌÀú °ø°İ »ç¿ë ¿Ï·á Ç¥½Ã (ÀÌ¹Ì Update¿¡¼­ ¼³Á¤ÇßÁö¸¸, È®½ÇÈ÷ ÇÏ±â À§ÇØ ¿©±â¼­µµ ¼³Á¤)
         laserAttackUsed = true;
     }
 
     void CreateLaser()
     {
-
-        // ±âÁ¸ ·¹ÀÌÀú°¡ ÀÖ´Ù¸é »èÁ¦
         if (currentLaser != null)
-        {
             Destroy(currentLaser);
-        }
 
-        // Ä³¸¯ÅÍ ¹æÇâ¿¡ µû¶ó ·¹ÀÌÀú À§Ä¡ ¼³Á¤
-        Vector3 laserPosition;
-        float direction = transform.localScale.x > 0 ? 1f : -1f; // ¹æÇâ È®ÀÎ (¿À¸¥ÂÊ: 1, ¿ŞÂÊ: -1)
+        float direction = transform.localScale.x > 0 ? 1f : -1f;
+        Vector3 laserPosition = new Vector3(
+            transform.position.x + direction * 10f,
+            transform.position.y - 0.5f,
+            0
+        );
 
-        if (direction > 0)
-        {
-            // ¿À¸¥ÂÊÀ» º¼ ¶§
-            laserPosition = new Vector3(this.transform.position.x + 10f, this.transform.position.y - 0.5f, 0);
-        }
-        else
-        {
-            // ¿ŞÂÊÀ» º¼ ¶§
-            laserPosition = new Vector3(this.transform.position.x - 10f, this.transform.position.y - 0.5f, 0);
-        }
-
-        // ·¹ÀÌÀú »ı¼º
         currentLaser = Instantiate(laserPrefab, laserPosition, Quaternion.identity);
+        currentLaser.transform.localScale = new Vector3(2.0f * direction, 1.0f, 1.0f);
 
-        // ·¹ÀÌÀú Å©±â¸¦ È­¸é ³¡±îÁö È®Àå
-        currentLaser.transform.localScale = new Vector3(2.0f * direction, 1.0f, 1.0f); // ¹æÇâ¿¡ µû¶ó XÃà Å©±â ¼³Á¤
-        // ·¹ÀÌÀú Collider2D ¼³Á¤
         Collider2D laserCollider = currentLaser.GetComponent<Collider2D>();
         if (laserCollider != null)
-        {
-            laserCollider.isTrigger = true; // Æ®¸®°Å È°¼ºÈ­
-        }
-        // **ÇÃ·¹ÀÌ¾î¿Í ¹ß»çÃ¼ÀÇ Ãæµ¹ ¹«½Ã**
-        Collider2D playerCollider = GetComponent<Collider2D>();
-        Collider2D currentLaserCollider = currentLaser.GetComponent<Collider2D>();
-        Physics2D.IgnoreCollision(playerCollider, currentLaserCollider);
+            laserCollider.isTrigger = true;
+
+        Physics2D.IgnoreCollision(GetComponent<Collider2D>(), currentLaser.GetComponent<Collider2D>());
     }
 
+    // â”€â”€ ëŒ€ì‹œ í›„ ê°•í™” ê³µê²© â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     IEnumerator DashAndAttack()
     {
-        // ÇöÀç ÇÃ·¹ÀÌ¾î°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î ´ë½Ã
         Vector2 dashDirection = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
         yield return StartCoroutine(Dash(dashDirection));
 
-        // °­È­ ±ÙÁ¢ °ø°İ ½ÇÇà
         this.animator.SetTrigger("AAttackTrigger");
-        PerformMeleeAttack(true); // °­È­ ±ÙÁ¢ °ø°İ ½ÇÇà
+        PerformMeleeAttack(true);
     }
 
-    // ±ÙÁ¢ °ø°İ ½ÇÇà
-    // Á¦¾î Á¦ÇÑ ÇÔ¼ö
-    IEnumerator DisableControlForDuration(GameObject target, float duration)
-    {
-        PlayerController controller = target.GetComponent<PlayerController>();
-        if (controller != null)
-        {
-            controller.enabled = false; // ÄÁÆ®·Ñ ºñÈ°¼ºÈ­
-            yield return new WaitForSeconds(duration);
-            controller.enabled = true; // ÄÁÆ®·Ñ ÀçÈ°¼ºÈ­
-        }
-
-    }
-    // ³Ë¹é ÇÔ¼ö 
+    // â”€â”€ ê·¼ê±°ë¦¬ ê³µê²© â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     void ApplyKnockback(Rigidbody2D targetRigidBody, float direction)
     {
-        float knockbackForce = 10.0f; // ³Ë¹é °­µµ
-        float knockbackDuration = 0.2f; // ³Ë¹é Áö¼Ó ½Ã°£
+        float knockbackForce = 10.0f;
+        float knockbackDuration = 0.2f;
 
-        // ³Ë¹é ¹æÇâ °áÁ¤
-        Vector2 knockbackDirection = new Vector2(direction, 0.5f).normalized; // xÃà°ú ¾à°£ÀÇ yÃàÀ¸·Î ¹Ğ¸²
+        Vector2 knockbackDirection = new Vector2(direction, 0.5f).normalized;
 
-        // Èû Ãß°¡
-        targetRigidBody.velocity = Vector2.zero; // ±âÁ¸ ¼Óµµ ÃÊ±âÈ­
+        targetRigidBody.velocity = Vector2.zero;
         targetRigidBody.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
 
-        // ³Ë¹é Áß Á¦¾î¸¦ Àá½Ã Á¦ÇÑ
         StartCoroutine(DisableControlForDuration(targetRigidBody.gameObject, knockbackDuration));
     }
 
     void PerformMeleeAttack(bool isEnhanced = false)
     {
-        // °ø°İ ¹üÀ§¿Í Áß½É ¼³Á¤
-        float attackWidth = isEnhanced ? 0.7f : 0.7f; // °­È­ °ø°İ ½Ã ´õ ³ĞÀº ¹üÀ§
+        float attackWidth = 0.7f;
         float attackHeight = 1.0f;
-        float damage = isEnhanced ? 0.2f : 0.1f; // °­È­ °ø°İ ½Ã ´õ Å« µ¥¹ÌÁö
+        float damage = isEnhanced ? 0.2f : 0.1f;
 
-        // Ä³¸¯ÅÍ ¹æÇâ¿¡ µû¶ó °ø°İ Áß½É °è»ê
         float direction = transform.localScale.x > 0 ? 1 : -1;
         Vector2 attackCenter = new Vector2(transform.position.x + direction * (attackWidth / 2), transform.position.y);
-
-        // °ø°İ ¹üÀ§ ¼³Á¤
         Vector2 attackSize = new Vector2(attackWidth, attackHeight);
 
-        // ÇØ´ç ¹üÀ§ ³»ÀÇ Ãæµ¹Ã¼ Å½»ö
         Collider2D[] hitTargets = Physics2D.OverlapBoxAll(attackCenter, attackSize, 0);
 
         foreach (Collider2D target in hitTargets)
         {
-            // »ó´ë¹æÀÎÁö È®ÀÎ
             if (target.CompareTag("Player1") || target.CompareTag("Player2"))
             {
-                if (target.tag != gameObject.tag) // ÀÚ½Å°ú ´Ù¸¥ ÅÂ±×¸¸ °ø°İ
+                if (target.tag != gameObject.tag)
                 {
                     GameObject director = GameObject.Find("GameDirector");
                     if (director != null)
@@ -412,41 +255,33 @@ public class BeeController : MonoBehaviour
                         if (gameDirector != null)
                         {
                             if (target.CompareTag("Player1"))
-                            {
-                                gameDirector.DecreaseHP1(damage); // Player1 µ¥¹ÌÁö Àû¿ë
-                            }
+                                gameDirector.DecreaseHP1(damage);
                             else if (target.CompareTag("Player2"))
-                            {
-                                gameDirector.DecreaseHP2(damage); // Player2 µ¥¹ÌÁö Àû¿ë
-                            }
+                                gameDirector.DecreaseHP2(damage);
                         }
                     }
 
-                    // ³Ë¹é È¿°ú Ãß°¡
                     Rigidbody2D targetRigidBody = target.GetComponent<Rigidbody2D>();
                     if (targetRigidBody != null)
-                    {
                         ApplyKnockback(targetRigidBody, direction);
-                    }
                 }
             }
         }
 
-        // ½Ã°¢Àû µğ¹ö±×¿ë (Unity Scene¿¡¼­ °ø°İ ¹üÀ§¸¦ È®ÀÎ °¡´É)
         Debug.DrawLine(
             attackCenter - new Vector2(attackWidth / 2, attackHeight / 2),
             attackCenter + new Vector2(attackWidth / 2, attackHeight / 2),
-            isEnhanced ? Color.yellow : Color.red, // °­È­ °ø°İÀº ³ë¶õ»ö, ÀÏ¹İ °ø°İÀº »¡°£»ö
+            isEnhanced ? Color.yellow : Color.red,
             0.1f
         );
     }
 
+    // â”€â”€ ì‹¤ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     void CreateShieldEffects()
     {
-        GameObject shield = Instantiate(shieldPrefab, new Vector3(transform.position.x, transform.position.y, transform.position.z), Quaternion.identity);
-        // ½¯µå¸¦ ÇöÀç ¿ÀºêÁ§Æ®(ÇÃ·¹ÀÌ¾î)ÀÇ ÀÚ½ÄÀ¸·Î ¼³Á¤
+        GameObject shield = Instantiate(shieldPrefab, transform.position, Quaternion.identity);
         shield.transform.SetParent(transform);
-        // ½¯µå È°¼ºÈ­
+
         GameObject director = GameObject.Find("GameDirector");
         if (director != null)
         {
@@ -454,17 +289,12 @@ public class BeeController : MonoBehaviour
             if (gameDirector != null)
             {
                 if (gameObject.CompareTag("Player1"))
-                {
                     gameDirector.isPlayer1ShieldActive = true;
-                }
                 else if (gameObject.CompareTag("Player2"))
-                {
                     gameDirector.isPlayer2ShieldActive = true;
-                }
             }
         }
 
-        // ½¯µå Áö¼Ó ½Ã°£ ÈÄ ºñÈ°¼ºÈ­
         StartCoroutine(DisableShieldAfterDuration(shield));
     }
 
@@ -472,7 +302,6 @@ public class BeeController : MonoBehaviour
     {
         yield return new WaitForSeconds(shieldDuration);
 
-        // ½¯µå ºñÈ°¼ºÈ­
         GameObject director = GameObject.Find("GameDirector");
         if (director != null)
         {
@@ -480,17 +309,12 @@ public class BeeController : MonoBehaviour
             if (gameDirector != null)
             {
                 if (gameObject.CompareTag("Player1"))
-                {
                     gameDirector.isPlayer1ShieldActive = false;
-                }
                 else if (gameObject.CompareTag("Player2"))
-                {
                     gameDirector.isPlayer2ShieldActive = false;
-                }
             }
         }
 
-        // ½¯µå °´Ã¼ »èÁ¦
         Destroy(shield);
     }
 }

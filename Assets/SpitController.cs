@@ -4,25 +4,27 @@ using UnityEngine;
 
 public class SpitController1 : MonoBehaviour
 {
-    public float knockbackForce = 5.0f; // ³Ë¹éÀÇ °­µµ
-    public float knockbackDuration = 0.2f; // ³Ë¹é Áö¼Ó ½Ã°£
+    public float knockbackForce = 5.0f; // ï¿½Ë¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    public float knockbackDuration = 0.2f; // ï¿½Ë¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ã°ï¿½
 
     public void OnTriggerEnter2D(Collider2D collision)
     {
+        if(collision.CompareTag(gameObject.tag)) return; // ìžì‹ ê³¼ ê°™ì€ íƒœê·¸ëŠ” ë¬´ì‹œ
+        
         GameObject director = GameObject.Find("GameDirector");
         float direction = transform.localScale.x > 0 ? -1f : 1f;
-        // Ãæµ¹ÇÑ ´ë»óÀÌ »ó´ë ÇÃ·¹ÀÌ¾îÀÎÁö ÅÂ±×·Î È®ÀÎ
-        if (collision.CompareTag("Player2")) // Player2°¡ ¸Â¾ÒÀ» ¶§
+        // ï¿½æµ¹ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Â±×·ï¿½ È®ï¿½ï¿½
+        if (collision.CompareTag("Player2")) // Player2ï¿½ï¿½ ï¿½Â¾ï¿½ï¿½ï¿½ ï¿½ï¿½
         {
-            director.GetComponent<GameDirector>().DecreaseHP2(0.025f); // »ó´ë Ä³¸¯ÅÍÀÇ HP °¨¼Ò Ã³¸®
-            ApplyKnockback(collision.gameObject, direction); // ³Ë¹é È¿°ú Ãß°¡ (-1Àº ¿ÞÂÊ ¹æÇâ)
-            Destroy(gameObject); // ¹ß»çÃ¼ »èÁ¦
+            director.GetComponent<GameDirector>().DecreaseHP2(0.025f); // ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ HP ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
+            ApplyKnockback(collision.gameObject, direction); // ï¿½Ë¹ï¿½ È¿ï¿½ï¿½ ï¿½ß°ï¿½ (-1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+            Destroy(gameObject); // ï¿½ß»ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½
         }
-        else if (collision.CompareTag("Player1")) // Player1ÀÌ ¸Â¾ÒÀ» ¶§
+        else if (collision.CompareTag("Player1")) // Player1ï¿½ï¿½ ï¿½Â¾ï¿½ï¿½ï¿½ ï¿½ï¿½
         {
-            director.GetComponent<GameDirector>().DecreaseHP1(0.025f); // »ó´ë Ä³¸¯ÅÍÀÇ HP °¨¼Ò Ã³¸®
-            ApplyKnockback(collision.gameObject, direction); // ³Ë¹é È¿°ú Ãß°¡ (1Àº ¿À¸¥ÂÊ ¹æÇâ)
-            Destroy(gameObject); // ¹ß»çÃ¼ »èÁ¦
+            director.GetComponent<GameDirector>().DecreaseHP1(0.025f); // ï¿½ï¿½ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ HP ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
+            ApplyKnockback(collision.gameObject, direction); // ï¿½Ë¹ï¿½ È¿ï¿½ï¿½ ï¿½ß°ï¿½ (1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+            Destroy(gameObject); // ï¿½ß»ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½
         }
     }
 
@@ -32,27 +34,27 @@ public class SpitController1 : MonoBehaviour
 
         if (targetRigidBody != null)
         {
-            // ³Ë¹é ¹æÇâ ¼³Á¤ (¾à°£ À§·Î ¹Ð¸®´Â È¿°ú Æ÷ÇÔ)
+            // ï¿½Ë¹ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½à°£ ï¿½ï¿½ï¿½ï¿½ ï¿½Ð¸ï¿½ï¿½ï¿½ È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
             Vector2 knockbackDirection = new Vector2(direction, 0.5f).normalized;
 
-            // ±âÁ¸ ¼Óµµ ÃÊ±âÈ­ ÈÄ ³Ë¹é Àû¿ë
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ ï¿½Ê±ï¿½È­ ï¿½ï¿½ ï¿½Ë¹ï¿½ ï¿½ï¿½ï¿½ï¿½
             targetRigidBody.velocity = Vector2.zero;
             targetRigidBody.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
 
-            // ³Ë¹é Áß ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ Á¦ÇÑ
+            // ï¿½Ë¹ï¿½ ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             StartCoroutine(DisableControlForDuration(target, knockbackDuration));
         }
     }
 
     IEnumerator DisableControlForDuration(GameObject target, float duration)
     {
-        PlayerController controller = target.GetComponent<PlayerController>();
+        AntController controller = target.GetComponent<AntController>();
 
         if (controller != null)
         {
-            controller.enabled = false; // ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ ºñÈ°¼ºÈ­
+            controller.enabled = false; // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
             yield return new WaitForSeconds(duration);
-            controller.enabled = true; // ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ ÀçÈ°¼ºÈ­
+            controller.enabled = true; // ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½È°ï¿½ï¿½È­
         }
     }
 }
