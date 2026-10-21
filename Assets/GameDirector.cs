@@ -1,192 +1,39 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement; // ¾À °ü¸®¸¦ À§ÇÑ ³×ÀÓ½ºÆäÀÌ½º Ãß°¡
+ï»¿using UnityEngine;
+using UnityEngine.SceneManagement;
 
+// íŒ ì§„í–‰ â€” ë‘ ìºë¦­í„°ì˜ Died ë¥¼ êµ¬ë…í•´ì„œ ìŠ¹íŒ¨ ì”¬ìœ¼ë¡œ ë„˜ê¸´ë‹¤.
+// ì²´ë ¥ ê³„ì‚° Â· ì‰´ë“œ Â· HPë°” ê·¸ë¦¬ê¸°ëŠ” ëª¨ë¥¸ë‹¤ (Health Â· Hurtbox Â· HealthBarView ëª«).
 public class GameDirector : MonoBehaviour
 {
-    GameObject HP_BarPlayer1;
-    GameObject HP_BarPlayer2;
-    public bool isPlayer1ShieldActive = false; // ÇÃ·¹ÀÌ¾î1 ½¯µå »óÅÂ
-    public bool isPlayer2ShieldActive = false; // ÇÃ·¹ÀÌ¾î2 ½¯µå »óÅÂ
+    [SerializeField] Health player1;
+    [SerializeField] Health player2;
+    [SerializeField] string player1WinScene = "1PWinScene";
+    [SerializeField] string player2WinScene = "2PWinScene";
 
-    private bool isGamePaused = false;         // °ÔÀÓ Á¤Áö »óÅÂ È®ÀÎ¿ë ÇÃ·¡±×
+    bool finished;
 
-    void Start()
+    void Awake()
     {
-        this.HP_BarPlayer1 = GameObject.Find("HP_BarPlayer1"); // ÇÃ·¹ÀÌ¾î1 Ã¼·Â¹Ù
-        this.HP_BarPlayer2 = GameObject.Find("HP_BarPlayer2"); // ÇÃ·¹ÀÌ¾î2 Ã¼·Â¹Ù
+        Application.targetFrameRate = 60;
     }
 
-    public void DecreaseHP1(float damage)
+    void OnEnable()
     {
-        if (isPlayer1ShieldActive || isGamePaused) return; // ½Çµå È°¼ºÈ­ »óÅÂ ¶Ç´Â °ÔÀÓ Á¤Áö ½Ã ¹«È¿È­
-
-        // Ã¼·Â °¨¼Ò
-        this.HP_BarPlayer1.GetComponent<Image>().fillAmount -= damage;
-
-        // Ã¼·Â 0 Ã¼Å©
-        if (this.HP_BarPlayer1.GetComponent<Image>().fillAmount <= 0)
-        {
-            PauseGame(2); // 2P ½Â¸®
-        }
+        if (player1 != null) player1.Died += OnDied;
+        if (player2 != null) player2.Died += OnDied;
     }
 
-    public void DecreaseHP2(float damage)
+    void OnDisable()
     {
-        if (isPlayer2ShieldActive || isGamePaused) return; // ½Çµå È°¼ºÈ­ »óÅÂ ¶Ç´Â °ÔÀÓ Á¤Áö ½Ã ¹«È¿È­
-
-        // Ã¼·Â °¨¼Ò
-        this.HP_BarPlayer2.GetComponent<Image>().fillAmount -= damage;
-
-        // Ã¼·Â 0 Ã¼Å©
-        if (this.HP_BarPlayer2.GetComponent<Image>().fillAmount <= 0)
-        {
-            PauseGame(1); // 1P ½Â¸®
-        }
+        if (player1 != null) player1.Died -= OnDied;
+        if (player2 != null) player2.Died -= OnDied;
     }
 
-    public void IncreaseHP1(float damage)
+    void OnDied(Health dead)
     {
-        this.HP_BarPlayer1.GetComponent<Image>().fillAmount += damage;
-    }
+        if (finished) return;
 
-    public void IncreaseHP2(float damage)
-    {
-        this.HP_BarPlayer2.GetComponent<Image>().fillAmount += damage;
-    }
-
-    private void PauseGame(int winner)
-    {
-        isGamePaused = true;
-        Time.timeScale = 0;
-
-        // ½Â¸® Á¶°Ç¿¡ µû¶ó ¾À ÀüÈ¯
-        if (winner == 1)
-        {
-            SceneManager.LoadScene("1PWinScene"); // 1P ½Â¸® ¾ÀÀ¸·Î ÀüÈ¯
-        }
-        else if (winner == 2)
-        {
-            SceneManager.LoadScene("2PWinScene"); // 2P ½Â¸® ¾ÀÀ¸·Î ÀüÈ¯
-        }
+        finished = true;
+        SceneManager.LoadScene(dead == player1 ? player2WinScene : player1WinScene);
     }
 }
-
-/*using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-
-public class GameDirector : MonoBehaviour
-{
-    GameObject HP_BarPlayer1;
-    GameObject HP_BarPlayer2;
-    public bool isPlayer1ShieldActive = false; // ÇÃ·¹ÀÌ¾î1 ½¯µå »óÅÂ
-    public bool isPlayer2ShieldActive = false; // ÇÃ·¹ÀÌ¾î2 ½¯µå »óÅÂ
-
-    public GameObject GameOverText;
-    private bool isGamePaused = false;         // °ÔÀÓ Á¤Áö »óÅÂ È®ÀÎ¿ë ÇÃ·¡±×
-
-    void Start()
-    {
-        this.HP_BarPlayer1 = GameObject.Find("HP_BarPlayer1"); // ÇÃ·¹ÀÌ¾î1 Ã¼·Â¹Ù
-        this.HP_BarPlayer2 = GameObject.Find("HP_BarPlayer2"); // ÇÃ·¹ÀÌ¾î2 Ã¼·Â¹Ù
-    }
-
-    public void DecreaseHP1(float damage)
-    {
-        if (isPlayer1ShieldActive || isGamePaused) return; // ½Çµå È°¼ºÈ­ »óÅÂ ¶Ç´Â °ÔÀÓ Á¤Áö ½Ã ¹«È¿È­
-
-        // Ã¼·Â °¨¼Ò
-        this.HP_BarPlayer1.GetComponent<Image>().fillAmount -= damage;
-
-        // Ã¼·Â 0 Ã¼Å©
-        if (this.HP_BarPlayer1.GetComponent<Image>().fillAmount <= 0)
-        {
-            PauseGame(); // °ÔÀÓ Á¤Áö
-        }
-    }
-
-    public void DecreaseHP2(float damage)
-    {
-        if (isPlayer2ShieldActive || isGamePaused) return; // ½Çµå È°¼ºÈ­ »óÅÂ ¶Ç´Â °ÔÀÓ Á¤Áö ½Ã ¹«È¿È­
-
-        // Ã¼·Â °¨¼Ò
-        this.HP_BarPlayer2.GetComponent<Image>().fillAmount -= damage;
-
-        // Ã¼·Â 0 Ã¼Å©
-        if (this.HP_BarPlayer2.GetComponent<Image>().fillAmount <= 0)
-        {
-            PauseGame(); // °ÔÀÓ Á¤Áö
-        }
-    }
-
-    public void IncreaseHP1(float damage)
-    {
-        this.HP_BarPlayer1.GetComponent<Image>().fillAmount += damage;
-    }
-
-    public void IncreaseHP2(float damage)
-    {
-        this.HP_BarPlayer2.GetComponent<Image>().fillAmount += damage;
-    }
-
-    private void PauseGame()
-    {
-        isGamePaused = true;
-        Time.timeScale = 0;
-
-        if (GameOverText != null)
-        {
-            GameOverText.SetActive(true); // GameOverText È°¼ºÈ­
-        }
-    }
-}*/
-
-/*using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-
-public class GameDirector : MonoBehaviour
-{
-
-    GameObject HP_BarPlayer1;
-    GameObject HP_BarPlayer2;
-    public bool isPlayer1ShieldActive = false; // ÇÃ·¹ÀÌ¾î1 ½¯µå »óÅÂ
-    public bool isPlayer2ShieldActive = false; // ÇÃ·¹ÀÌ¾î2 ½¯µå »óÅÂ
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        this.HP_BarPlayer1 = GameObject.Find("HP_BarPlayer1");      // ÇÃ·¹ÀÌ¾î1 Ã¼·Â¹Ù °´Ã¼ ¼³Á¤
-        this.HP_BarPlayer2 = GameObject.Find("HP_BarPlayer2");      // ÇÃ·¹ÀÌ¾î2 Ã¼·Â¹Ù °´Ã¼ ¼³Á¤
-    }
-
-
-    public void DecreaseHP1(float damage)
-    {
-        
-        if (isPlayer1ShieldActive) return; // ½Çµå°¡ È°¼ºÈ­ µÈ °æ¿ì µ¥¹ÌÁö ¹«È¿È­
-        this.HP_BarPlayer1.GetComponent<Image>().fillAmount -= damage;
-    }
-
-    public void DecreaseHP2(float damage)
-    {
-        if (isPlayer2ShieldActive) return;  // ½Çµå°¡ È°¼ºÈ­ µÈ °æ¿ì µ¥¹ÌÁö ¹«È¿È­
-        this.HP_BarPlayer2.GetComponent<Image>().fillAmount -= damage;
-    }
-
-    public void IncreaseHP1(float damage)
-    {
-        this.HP_BarPlayer1.GetComponent<Image>().fillAmount += damage;
-    }
-
-    public void IncreaseHP2(float damage)
-    {
-        this.HP_BarPlayer2.GetComponent<Image>().fillAmount += damage;
-    }
-
-}*/

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class jellyController : MonoBehaviour
 {
@@ -7,6 +7,7 @@ public class jellyController : MonoBehaviour
     public float spawnY = 5.5f;
     public float fallSpeed = 5f;
     public float lifetime = 10f;
+    public float healAmount = 0.1f;
     private bool isGrounded = false;
     private float groundY = -2.3f;
 
@@ -53,32 +54,22 @@ public class jellyController : MonoBehaviour
             isGrounded = true;
             transform.position = new Vector3(transform.position.x, groundY + 3.0f, transform.position.z);
         }
-        // PlayerTag1 ¶Ç´Â PlayerTag2¿Í Ãæµ¹ÇßÀ» ¶§
-        else if (collision.gameObject.CompareTag("Player1"))
+        // ìºë¦­í„°ì™€ ë‹¿ìœ¼ë©´ ê·¸ ìºë¦­í„°ì˜ ì²´ë ¥ì„ íšŒë³µ â€” 1Pì¸ì§€ 2Pì¸ì§€ ëª°ë¼ë„ ëœë‹¤
+        else
         {
-            GameDirector gameDirector = FindObjectOfType<GameDirector>();
-            if (gameDirector != null)
+            Health health = collision.GetComponentInParent<Health>();
+            if (health != null)
             {
-                gameDirector.IncreaseHP1(0.1f); // Player1 Ã¼·Â Áõ°¡
+                health.Heal(healAmount);
+                NotifyGenerator();
+                Destroy(gameObject); // ì ¤ë¦¬ ì œê±°
             }
-            NotifyGenerator();
-            Destroy(gameObject); // Á©¸® Á¦°Å
-        }
-        else if (collision.gameObject.CompareTag("Player2"))
-        {
-            GameDirector gameDirector = FindObjectOfType<GameDirector>();
-            if (gameDirector != null)
-            {
-                gameDirector.IncreaseHP2(0.1f); // Player2 Ã¼·Â Áõ°¡
-            }
-            NotifyGenerator();
-            Destroy(gameObject); // Á©¸® Á¦°Å
         }
     }
 
     private void NotifyGenerator()
     {
-        // JellyGenerator¿¡ Á©¸®°¡ ÆÄ±«µÇ¾úÀ½À» ¾Ë¸²
+        // JellyGeneratorì— ì ¤ë¦¬ê°€ íŒŒê´´ë˜ì—ˆìŒì„ ì•Œë¦¼
         jellyGenerator generator = FindObjectOfType<jellyGenerator>();
         if (generator != null)
         {
